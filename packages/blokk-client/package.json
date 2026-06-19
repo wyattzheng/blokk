@@ -1,0 +1,15 @@
+{
+  "name": "blokk-client",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "devDependencies": {
+    "@webgpu/types": "^0.1.52",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}

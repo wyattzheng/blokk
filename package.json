@@ -1,0 +1,8 @@
+{
+  "name": "blokk",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter blokk-client dev",
+    "build": "pnpm --filter blokk-client build"
+  }
+}
