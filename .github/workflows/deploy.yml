@@ -77,7 +77,8 @@ jobs:
 
             certbot renew --dns-cloudflare --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini --deploy-hook 'pm2 restart blokk-server' --non-interactive || true
 
-            pm2 restart blokk-server || pm2 start /app/server/main.js --name blokk-server
+            pm2 delete blokk-server 2>/dev/null || true
+            pm2 start /app/server/main.cjs --name blokk-server
             pm2 save
           EOF
 
