@@ -94,10 +94,18 @@ async function main() {
   })
 
   // Network
+  const hud = document.getElementById('hud')!
+  const btn = document.getElementById('btn')!
+
   const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:9000'
-  const net = new GameNetwork(`${wsUrl}?room=default`, (data) => {
-    // TODO: handle incoming messages (other players' positions, block updates)
-    console.log('received', new Uint8Array(data))
+  const net = new GameNetwork(wsUrl, (msg) => {
+    if (msg.type === 'counter') {
+      hud.textContent = String(msg.value)
+    }
+  })
+
+  btn.addEventListener('click', () => {
+    net.send({ type: 'increment' })
   })
 
   // Render loop

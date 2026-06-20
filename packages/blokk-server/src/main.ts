@@ -12,29 +12,34 @@ const server = createServer({
 
 const wss = new WebSocketServer({ server })
 
-const rooms = new Map<string, Set<WebSocket>>()
+const clients = new Set<WebSocket>()
+let counter = 0
 
-wss.on('connection', (ws, req) => {
-  const roomId = new URL(req.url!, `http://localhost`).searchParams.get('room') || 'default'
+function broadcast(data: string) {
+  for (const ws of clients) {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(data)
+    }
+  }
+}
 
-  if (!rooms.has(roomId)) rooms.set(roomId, new Set())
-  const room = rooms.get(roomId)!
-  room.add(ws)
+wss.on('connection', (ws) => {
+  clients.add(ws)
+  console.log(`player joined (${clients.size} online)`)
 
-  console.log(`[${roomId}] player joined (${room.size} online)`)
+  ws.send(JSON.stringify({ type: 'counter', value: counter }))
 
   ws.on('message', (data) => {
-    for (const peer of room) {
-      if (peer !== ws && peer.readyState === WebSocket.OPEN) {
-        peer.send(data)
-      }
+    const msg = JSON.parse(data.toString())
+    if (msg.type === 'increment') {
+      counter++
+      broadcast(JSON.stringify({ type: 'counter', value: counter }))
     }
   })
 
   ws.on('close', () => {
-    room.delete(ws)
-    if (room.size === 0) rooms.delete(roomId)
-    console.log(`[${roomId}] player left (${room.size} online)`)
+    clients.delete(ws)
+    console.log(`player left (${clients.size} online)`)
   })
 })
 

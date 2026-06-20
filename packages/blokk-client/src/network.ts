@@ -1,4 +1,4 @@
-export type MessageHandler = (data: ArrayBuffer) => void
+export type MessageHandler = (msg: any) => void
 
 export class GameNetwork {
   private ws: WebSocket | null = null
@@ -14,7 +14,6 @@ export class GameNetwork {
 
   private connect() {
     this.ws = new WebSocket(this.url)
-    this.ws.binaryType = 'arraybuffer'
 
     this.ws.onopen = () => {
       console.log('connected to server')
@@ -25,7 +24,8 @@ export class GameNetwork {
     }
 
     this.ws.onmessage = (e) => {
-      this.onMessage(e.data)
+      const msg = JSON.parse(e.data)
+      this.onMessage(msg)
     }
 
     this.ws.onclose = () => {
@@ -34,9 +34,9 @@ export class GameNetwork {
     }
   }
 
-  send(data: ArrayBuffer) {
+  send(msg: any) {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(data)
+      this.ws.send(JSON.stringify(msg))
     }
   }
 
