@@ -104,7 +104,7 @@ async function main() {
     const view = lookAt(eye, [0.5, 0.5, 0.5], [0, 1, 0])
     const mvp = multiply(proj, view)
 
-    device.queue.writeBuffer(uniformBuffer, 0, mvp)
+    device.queue.writeBuffer(uniformBuffer, 0, mvp.buffer)
 
     const encoder = device.createCommandEncoder()
     const pass = encoder.beginRenderPass({
