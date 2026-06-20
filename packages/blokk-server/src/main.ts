@@ -5,15 +5,23 @@ import { WebSocketServer, WebSocket } from 'ws'
 const PORT = Number(process.env.PORT) || 9000
 const CERT_PATH = process.env.CERT_PATH || '/etc/letsencrypt/live/s.blokk.cn'
 
+const clients = new Set<WebSocket>()
+let counter = 0
+
 const server = createServer({
   cert: readFileSync(`${CERT_PATH}/fullchain.pem`),
   key: readFileSync(`${CERT_PATH}/privkey.pem`),
+}, (req, res) => {
+  if (req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ status: 'ok', online: clients.size, counter }))
+    return
+  }
+  res.writeHead(404)
+  res.end()
 })
 
 const wss = new WebSocketServer({ server })
-
-const clients = new Set<WebSocket>()
-let counter = 0
 
 function broadcast(data: string) {
   for (const ws of clients) {

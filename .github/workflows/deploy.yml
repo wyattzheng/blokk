@@ -80,3 +80,16 @@ jobs:
             pm2 restart blokk-server || pm2 start /app/server/main.js --name blokk-server
             pm2 save
           EOF
+
+      - name: Health check
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sk --max-time 3 https://${{ secrets.HOST }}:9000/health | grep -q '"status":"ok"'; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i/30 failed, retrying..."
+            sleep 2
+          done
+          echo "Health check failed after 30 attempts"
+          exit 1
