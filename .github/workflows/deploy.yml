@@ -43,10 +43,8 @@ jobs:
 
       - name: Deploy server
         run: |
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key" \
-            packages/blokk-server/dist/ \
-            ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:/app/server/
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.HOST }} "mkdir -p /app/server"
+          scp -i ~/.ssh/deploy_key -r packages/blokk-server/dist/* ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:/app/server/
 
       - name: Restart server
         run: |
