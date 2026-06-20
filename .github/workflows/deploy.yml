@@ -26,7 +26,7 @@ jobs:
       - name: Build client
         run: pnpm --filter blokk-client build
         env:
-          VITE_WS_URL: ws://s.blokk.cn:9000
+          VITE_WS_URL: wss://s.blokk.cn:9000
 
       - name: Deploy client to Cloudflare Pages
         run: npx wrangler pages deploy packages/blokk-client/dist --project-name=blokk
@@ -59,6 +59,13 @@ jobs:
             if ! command -v pm2 &>/dev/null; then
               npm install -g pm2
               pm2 startup
+            fi
+            if ! command -v certbot &>/dev/null; then
+              yum install -y certbot
+            fi
+            if [ ! -f /etc/letsencrypt/live/s.blokk.cn/fullchain.pem ]; then
+              certbot certonly --standalone -d s.blokk.cn --non-interactive --agree-tos --register-unsafely-without-email
+              echo "0 3 * * * certbot renew --deploy-hook 'pm2 restart blokk-server'" | crontab -
             fi
             pm2 restart blokk-server || pm2 start /app/server/main.js --name blokk-server
             pm2 save

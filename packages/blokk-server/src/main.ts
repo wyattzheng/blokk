@@ -1,8 +1,21 @@
+import { readFileSync, existsSync } from 'fs'
+import { createServer as createHttpsServer } from 'https'
+import { createServer as createHttpServer } from 'http'
 import { WebSocketServer, WebSocket } from 'ws'
 
 const PORT = Number(process.env.PORT) || 9000
+const CERT_PATH = '/etc/letsencrypt/live/s.blokk.cn'
 
-const wss = new WebSocketServer({ port: PORT })
+const hasCert = existsSync(`${CERT_PATH}/fullchain.pem`)
+
+const server = hasCert
+  ? createHttpsServer({
+      cert: readFileSync(`${CERT_PATH}/fullchain.pem`),
+      key: readFileSync(`${CERT_PATH}/privkey.pem`),
+    })
+  : createHttpServer()
+
+const wss = new WebSocketServer({ server })
 
 const rooms = new Map<string, Set<WebSocket>>()
 
@@ -30,4 +43,6 @@ wss.on('connection', (ws, req) => {
   })
 })
 
-console.log(`blokk-server listening on ws://localhost:${PORT}`)
+server.listen(PORT, () => {
+  console.log(`blokk-server listening on ${hasCert ? 'wss' : 'ws'}://localhost:${PORT}`)
+})
