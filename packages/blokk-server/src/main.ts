@@ -29,19 +29,16 @@ wss.on('connection', (ws) => {
 
   ws.send(JSON.stringify({ type: 'counter', value: counter }))
 
-  ws.on('message', (data) => {
-    const msg = JSON.parse(data.toString())
-    if (msg.type === 'increment') {
-      counter++
-      broadcast(JSON.stringify({ type: 'counter', value: counter }))
-    }
-  })
-
   ws.on('close', () => {
     clients.delete(ws)
     console.log(`player left (${clients.size} online)`)
   })
 })
+
+setInterval(() => {
+  counter++
+  broadcast(JSON.stringify({ type: 'counter', value: counter }))
+}, 1000)
 
 server.listen(PORT, () => {
   console.log(`blokk-server listening on wss://localhost:${PORT}`)

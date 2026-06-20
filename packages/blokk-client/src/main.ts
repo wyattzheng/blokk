@@ -95,17 +95,12 @@ async function main() {
 
   // Network
   const hud = document.getElementById('hud')!
-  const btn = document.getElementById('btn')!
 
   const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:9000'
-  const net = new GameNetwork(wsUrl, (msg) => {
+  new GameNetwork(wsUrl, (msg) => {
     if (msg.type === 'counter') {
       hud.textContent = String(msg.value)
     }
-  })
-
-  btn.addEventListener('click', () => {
-    net.send({ type: 'increment' })
   })
 
   // Render loop
