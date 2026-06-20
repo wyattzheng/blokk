@@ -27,10 +27,9 @@ jobs:
         run: pnpm --filter blokk-client build
 
       - name: Deploy client to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          command: pages deploy packages/blokk-client/dist --project-name=blokk
+        run: npx wrangler pages deploy packages/blokk-client/dist --project-name=blokk
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
 
       - name: Build server
         run: pnpm --filter blokk-server build
@@ -46,12 +45,11 @@ jobs:
         run: |
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key" \
-            packages/blokk-server/ \
+            packages/blokk-server/dist/ \
             ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:/app/server/
 
-      - name: Install & Restart
+      - name: Restart server
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.HOST }} << 'EOF'
-            cd /app/server && npm install --production
-            pm2 restart blokk-server || pm2 start src/main.js --name blokk-server
+            pm2 restart blokk-server || pm2 start /app/server/main.js --name blokk-server
           EOF
