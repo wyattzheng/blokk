@@ -84,13 +84,13 @@ jobs:
 
       - name: Health check
         run: |
-          for i in $(seq 1 30); do
-            if curl -sk --max-time 3 https://${{ secrets.HOST }}:9000/health | grep -q '"status":"ok"'; then
+          for i in $(seq 1 10); do
+            if curl -sk --max-time 2 https://${{ secrets.HOST }}:9000/health | grep -q '"status":"ok"'; then
               echo "Health check passed"
               exit 0
             fi
-            echo "Attempt $i/30 failed, retrying..."
-            sleep 2
+            echo "Attempt $i/10 failed, retrying..."
+            sleep 1
           done
-          echo "Health check failed after 30 attempts"
+          echo "Health check failed"
           exit 1
